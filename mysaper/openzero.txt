@@ -1,0 +1,38 @@
+кусок кода с логикой открытие путсых клеток, но данный код взят из другого проекта.
+
+Procedure OpenZero(fx, fy : integer);
+var fl :boolean;
+    step, i, j : integer;
+begin
+   myb[fx, fy].q := -1;
+   step := -1;
+   repeat
+      fl := true;
+      for var x := 1 to N do begin
+         for var y := 1 to N do begin
+            if myb[x, y].q < 0 then begin
+               {*** Проверка соседних клеток ***}
+               for var dx := -1 to 1 do begin
+                  for var dy := -1 to 1 do 
+                     if not ((dx = 0) and (dy = 0)) then begin //Центральную клетку не считаем
+                        i := x + dx;
+                        j := y + dy;
+                        //Если не выходит за границы поля
+                        if ((i > 0) and (i <= N) and (j > 0) and (j <= N)) then begin
+                           if myb[i, j].q = 0 then begin
+                              myb[i, j].q := step;
+                              fl := false; //Была открыта клетка - ищем др.
+                           end;
+                            {if myb[i, j].q > 0 then begin                              
+                              Sell[i, j].Text := IntToStr(myb[i, j].q);
+                           end;}
+                        end;
+                     end;
+                  end;
+                {********************}  
+            end;
+         end;qqqqqqqqqqqqqq
+      end;
+      step := step - 1;
+   until fl;
+end;

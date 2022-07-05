@@ -1,0 +1,222 @@
+program saper;
+
+uses GraphABC, ABCObjects, Events, Timers, ABCButtons;
+
+type
+  sbutton = record  //тип кнопки
+    x, y, sx, sy, q: integer;
+    chek, flag, bomb: boolean;
+  end;
+
+var
+  n: array[0..13] of Picture;   ///// загружаем текстурки
+  myB: array[1..10, 1..10] of sbutton;
+  BtNewGame: ButtonABC;
+  Gamemode: boolean;
+  calcul: Timer;
+
+procedure The_End();
+var
+  i, j: integer;
+begin
+  for i := 1 to 10 do
+  begin
+    for j := 1 to 10 do
+    begin
+      if (myb[i, j].q = 9) and (myB[i, j].chek = true) then begin
+        font.Color := clred;
+        font.Size := 40;
+        textout(400, 130, 'Проигрыш!');
+        //Gamemode := true;
+      end;
+    end;
+  end;  
+end;
+
+procedure win();
+var
+  i, j: integer;
+begin
+  for i := 1 to 10 do
+  begin
+    for j := 1 to 10 do
+    begin
+      if (myb[i, j].q <> 9) and (myB[i, j].chek = true) then begin
+        font.Color := clred;
+        font.Size := 40;
+        textout(400, 130, 'Выигрыш!');
+        //Gamemode := true;
+      end;
+    end;
+  end;  
+end;
+
+procedure Calchole({i:integer;j:integer});
+var
+  i, j: integer;
+begin
+  for i := 1 to 10 do
+  begin
+    for j := 1 to 10 do
+    begin
+       if (i = 1) and (j = 1) and (myb[1,1].chek) then begin//верхний левый угол
+        if myb[1, 2].q = 0 then myb[1, 2].chek := true;
+        if myb[2, 1].q = 0 then myb[2, 1].chek := true;
+        if myb[2, 2].q = 0 then myb[2, 2].chek := true;
+      end;
+      if (i = 1) and (j = 10) and (myb[1,10].chek)then begin//верхний правый угол
+        if myb[1, 9].q = 0 then myb[1, 9].chek := true;
+        if myb[2, 10].q = 0 then myb[2, 10].chek := true;
+        if myb[2, 9].q = 0 then myb[2, 9].chek := true;
+      end;
+      if (i = 10) and (j = 1)and (myb[10,1].chek) then begin//нижний левый угол
+        if myb[9, 1].q = 0 then myb[9, 1].chek := true;
+        if myb[10, 2].q = 0 then myb[10, 2].chek := true;
+        if myb[2, 9].q = 0 then myb[2, 9].chek := true;
+      end;
+      if (i = 10) and (j = 10)and (myb[10,10].chek) then begin//нижний правый угол
+        if myb[10, 9].q = 0 then myb[10, 9].chek := true;
+        if myb[9, 10].q = 0 then myb[9, 10].chek := true;
+        if myb[9, 9].q = 0 then myb[9, 9].chek := true;
+      end;
+      if (i = 1) and (j <> 1) and (j <> 10)and (myb[1,j].chek) then begin
+        if myb[1, j - 1].q = 0 then myb[1, j].chek := true;//для верхнего ряда без углов
+        if myb[1, j + 1].q = 0 then myb[1, j].chek := true;
+        if myb[2, j].q = 0 then myb[1, j].chek := true;
+        if myb[2, j - 1].q = 0 then myb[1, j].chek := true;
+        if myb[2, j + 1].q = 0 then myb[1, j].chek := true;
+      end;
+      if (i = 10) and (j <> 1) and (j <> 10)and (myb[10,j].chek) then begin
+        if myb[10, j - 1].q = 0 then myb[10, j].chek := true;//для нижнего ряда без углов
+        if myb[10, j + 1].q = 0 then myb[10, j].chek := true;
+        if myb[9, j].q = 0 then myb[10, j].chek := true;
+        if myb[9, j - 1].q = 0 then myb[10, j].chek := true;
+        if myb[9, j + 1].q = 0 then myb[10, j].chek := true;
+      end;
+      if (j = 1) and (i <> 1) and (i <> 10)and (myb[i,1].chek) then begin
+        if myb[i - 1, j].q = 0 then myb[i, 1].chek := true;//для левого ряда без углов
+        if myb[i + 1, j].q = 0 then myb[i, 1].chek := true;
+        if myb[i, j + 1].q = 0 then myb[i, 1].chek := true;
+        if myb[i - 1, j + 1].q = 0 then myb[i, 1].chek := true;
+        if myb[i + 1, j + 1].q = 0 then myb[i, 1].chek := true;
+      end;
+      if (j = 10) and (i <> 1) and (i <> 10)and (myb[i,10].chek) then begin
+        if myb[i - 1, j].q = 0 then myb[i, 10].chek := true;//для правого ряда без углов
+        if myb[i + 1, j].q = 0 then myb[i, 10].chek := true;
+        if myb[i, j - 1].q = 0 then myb[i, 10].chek := true;
+        if myb[i - 1, j - 1].q = 0 then myb[i, 10].chek := true;
+        if myb[i + 1, j - 1].q = 0 then myb[i, 10].chek := true;
+      end;
+      if (i <> 1) and (j <> 1) and (i <> 10) and (j <> 10)and (myb[i,j].chek) then begin
+        if myb[i + 1, j].q = 0 then myb[i, j].chek := true;//для центральных клеток
+        if myb[i - 1, j].q = 0 then myb[i, j].chek := true;
+        if myb[i, j + 1].q = 0 then myb[i, j].chek := true;
+        if myb[i, j - 1].q = 0 then myb[i, j].chek := true;
+        if myb[i + 1, j + 1].q = 0 then myb[i, j].chek := true;
+        if myb[i - 1, j - 1].q = 0 then myb[i, j].chek := true;
+        if myb[i + 1, j - 1].q = 0 then myb[i, j].chek := true;
+        if myb[i - 1, j + 1].q = 0 then myb[i, j].chek := true;
+      end;
+    end;
+  end;  
+end;
+
+procedure Res_Load();  //Загрузка текстур
+begin
+  window.Height := 500;   /////// высота окна
+  window.Width := 700;     /////// ширина окна
+  window.Caption := 'Сапер'; /////// название окна
+  window.IsFixedSize := true; /////// фиксируем размер  
+  n[1] := Picture.Create('resurce\bclear.png');
+  n[1].Load('resurce\bclear.png'); //грузим картинку 
+  n[2] := Picture.Create('resurce\b1.png');
+  n[2].Load('resurce\b1.png'); //грузим картинку      
+  n[3] := Picture.Create('resurce\b2.png');
+  n[3].Load('resurce\b2.png'); //грузим картинку 
+  n[4] := Picture.Create('resurce\b3.png');
+  n[4].Load('resurce\b3.png'); //грузим картинку         
+  n[5] := Picture.Create('resurce\b4.png');
+  n[5].Load('resurce\b4.png'); //грузим картинку      
+  n[6] := Picture.Create('resurce\b5.png');
+  n[6].Load('resurce\b5.png'); //грузим картинку  
+  n[7] := Picture.Create('resurce\b6.png');
+  n[7].Load('resurce\b6.png'); //грузим картинку     
+  n[8] := Picture.Create('resurce\b7.png');
+  n[8].Load('resurce\b7.png'); //грузим картинку 
+  n[9] := Picture.Create('resurce\b8.png');
+  n[9].Load('resurce\b8.png'); //грузим картинку         
+  n[10] := Picture.Create('resurce\bb.jpg');
+  n[10].Load('resurce\bb.jpg'); //грузим картинку 
+  n[12] := Picture.Create('resurce\bnoch.png');
+  n[12].Load('resurce\bnoch.png'); //грузим картинку  
+  n[13] := Picture.Create('resurce\flag.png');
+  n[13].Load('resurce\flag.png'); //грузим картинку     
+end;
+
+procedure NewGame; //new game
+begin
+  window.clear;
+  btNewGame := ButtonABC.Create(575, 40, 100, 'Новая игра', clSkyBlue);
+  RandomPole();
+  CalcBomb();
+  DrawPoleSapera();
+  btNewGame.OnClick := NewGame;
+end;
+
+function MyButtonClick(x, y, sx, sy, mx, my, mb: integer): boolean;//klick or not
+begin
+  if(mx >= x) and (mx <= x + sx) and (my >= y) and (my <= y + sy) then
+    result := true
+  else result := false;      
+end;
+
+procedure MouseDown(x, y, mb: integer); //where klick
+var
+  b: boolean;
+  i, j: integer;
+begin
+  if GameMode = false then begin
+    for i := 1 to 10 do
+    begin
+      for j := 1 to 10 do
+      begin
+        if mb = 1 then begin  //если кликнули на рисунке левой кнопкой
+          b := MyButtonClick(myB[i, j].x, myB[i, j].y, 32, 32, x, y, mb);
+          if b = true then  
+          begin
+            myB[i, j].chek := true;
+            //if not myb[i, j].bomb then Calchole(i, j);
+          end;                    
+        end;      
+        if mb = 2 then begin //если кликнули на рисунке правой кнопкой
+          b := MyButtonClick(myB[i, j].X, myB[i, j].Y, 32, 32, x, y, mb);
+          if b = true then  
+          begin
+            if myB[i, j].chek <> true then begin
+              if myB[i, j].flag = true then begin
+                myB[i, j].flag := false;                             
+              end else
+              begin
+                myB[i, j].flag := true; 
+              end;
+            end;          
+          end;           
+        end;      
+      end;
+    end;
+  end;
+  DrawPoleSapera();
+end;
+
+begin//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  Gamemode := false;
+  Res_Load();
+  btNewGame := ButtonABC.Create(575, 40, 100, 'Новая игра', clSkyBlue);
+  btNewGame.OnClick := NewGame;
+  RandomPole();
+  CalcBomb();
+  DrawPoleSapera(); 
+  OnMouseDown := MouseDown;
+  calcul := Timer.Create(2000,Calchole);
+  calcul.Start;
+end.
